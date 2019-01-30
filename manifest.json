@@ -1,0 +1,31 @@
+ {
+    "name": "Twitch PiP",
+    "version": "0.1",
+    "description": "A picture-in-picture extension for Twitch.",
+    "manifest_version": 2,
+    "offline_enabled": false,
+    "background": {
+        "scripts": [ "background/main.js" ],
+        "persistent": false
+    },
+    "browser_action": {
+        "default_title": "Twitch PiP",
+        "default_popup": "popups/not-found.html"
+    },
+    "content_scripts": [
+    	{
+	      "all_frames": true,
+          "exclude_matches": [ "*://*.twitch.tv/*.html", "*://*.twitch.tv/*.html?*", "*://*.twitch.tv/*.htm", "*://*.twitch.tv/*.htm?*" ],
+	      "css": [ "content/main.css" ],
+	      "js": [ "content/main.js", "lib/twitch-player.js" ],
+	      "matches": [ "*://*.twitch.tv/*" ],
+	      "run_at": "document_end"
+    	}
+    ],
+    "permissions": [
+        "cookies",
+        "activeTab",
+        "webNavigation",
+        "tabs"
+    ]
+  }
