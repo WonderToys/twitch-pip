@@ -1,3 +1,5 @@
+let DO_SWAP = null;
+
 // -----
 // 	Helpers
 // -----
@@ -24,4 +26,30 @@ const setPopup = (tab) => {
 // -----
 
 chrome.runtime.onStartup.addListener(() => setPopup(chrome.activeTab));
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => setPopup(tab));
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if ( changeInfo.status === 'complete' && DO_SWAP != null ) {
+		if ( tab.id === DO_SWAP.tab ) {
+			chrome.tabs.sendMessage(DO_SWAP.tab, { 
+				message: 'open-pip',
+				detail: {
+					channel: DO_SWAP.channel
+				}
+			});  
+			DO_SWAP = null;
+		}
+	}
+
+	setPopup(tab)
+});
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+	const query = { active: true, currentWindow: true};
+	chrome.tabs.query(query, (tabs) => {
+		DO_SWAP = {
+			channel: message.detail.pip,
+			tab: tabs[0].id
+		};
+
+		chrome.tabs.update({ url: `https://www.twitch.tv/${ message.detail.large }` });
+	});
+});

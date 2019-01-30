@@ -17,7 +17,12 @@
 	      "all_frames": true,
           "exclude_matches": [ "*://*.twitch.tv/*.html", "*://*.twitch.tv/*.html?*", "*://*.twitch.tv/*.htm", "*://*.twitch.tv/*.htm?*" ],
 	      "css": [ "content/main.css" ],
-	      "js": [ "content/main.js", "lib/twitch-player.js" ],
+	      "js": [ 
+            "lib/jQuery.js",
+            "lib/twitch-player.js",
+            "lib/fontawesome.js",
+            "content/main.js"
+          ],
 	      "matches": [ "*://*.twitch.tv/*" ],
 	      "run_at": "document_end"
     	}
@@ -26,6 +31,7 @@
         "cookies",
         "activeTab",
         "webNavigation",
-        "tabs"
+        "tabs",
+        "storage"
     ]
   }

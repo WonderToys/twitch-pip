@@ -1,7 +1,35 @@
 <meta charset="utf-8">
-<div>
-	<label for="channel">Channel Name</label>
-	<input id="channel" type="text" />
+<link rel="stylesheet" href="../lib/bulma.css">
+<style type="text/css">
+html, body {
+	height: auto;
+	padding: 0px;
+	margin: 0;
+	min-width: 0px;
+}
+
+.popup-content {
+	padding: 1rem;
+	width: 280px;
+}
+</style>
+
+<div class="popup-content">
+	<div class="field has-addons">
+		<div class="control">
+			<input id="channel" type="text" class="input" placeholder="Channel name"></input>
+		</div>
+		<div class="control">
+			<a id="openButton" class="button is-info">
+				Open
+			</a>
+		</div>
+	</div>
+
+	<div class="checkbox">
+		<input id="bigger" type="checkbox" class="switch is-info">
+		<label for="bigger">Bigger picture-in-picture</label>
+	</div>
 </div>
 
 <script src="found.js"></script>
