@@ -50,6 +50,7 @@ const createPip = (channel) => {
 				.player-button.qa-fullscreen-button { display: none !important; }
 				.player-button.player-button--settings { display: none !important; }
 				.extension-taskbar { display: none !important; }
+				.extension-container { display: none !important; }
 				.qa-settings-banner-span { display: none !important; }
 			</style>
 		`;
@@ -59,7 +60,9 @@ const createPip = (channel) => {
 
 	$pip.on('mouseover', () => {
 		const playerText = $iFrame.contents().find('a.qa-display-name');
-		$pip.find('.twitch-pip-text').text(playerText.text());
+		const viewers = $iFrame.contents().find('.player-streaminfo__viewers > span > span');
+
+		$pip.find('.twitch-pip-text').text(`${ playerText.text() } (${ viewers.text() })`);
 	});
 
 	const closeButton = $pip.find('.twitch-pip-close');

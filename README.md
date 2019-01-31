@@ -1,6 +1,6 @@
 Installation
 ------------
-
+0. Remove Twitch PiP from Chrome if you have another version installed already
 1. Download and unzip extension from [here](https://github.com/WonderToys/twitch-pip/archive/master.zip)
 2. Navigate to [chrome://extensions](chrome://extensions)
 3. Locate (near the top-right of the page) the toggle for `Developer mode` and turn it `on`
