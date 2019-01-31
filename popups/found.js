@@ -23,4 +23,13 @@ channel.addEventListener('keyup', (event) => {
 	}
 });
 
+chrome.storage.sync.get([ 'bigger' ], (items) => {
+	if ( items.bigger === true ) {
+		bigger.checked = true;
+	}
+	else {
+		bigger.checked = false;
+	}
+});
+
 openButton.addEventListener('click', openPip);

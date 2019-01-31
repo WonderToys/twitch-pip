@@ -63,6 +63,7 @@ const createPip = (channel) => {
 		const viewers = $iFrame.contents().find('.player-streaminfo__viewers > span > span');
 
 		$pip.find('.twitch-pip-text').text(`${ playerText.text() } (${ viewers.text() })`);
+		$pip.find('.twitch-pip-open').attr('href', `https://www.twitch.tv/${ playerText.text() }`);
 	});
 
 	const closeButton = $pip.find('.twitch-pip-close');
@@ -145,6 +146,16 @@ const createPip = (channel) => {
 	});
 }; //- createPip()
 
+// openPip() 
+const openPip = (channel) => {
+	if ( $pip == null ) {
+		createPip(channel);
+	}
+	else {
+		$iFrame.attr('src', `https://player.twitch.tv/?channel=${ channel }`);
+	}
+};
+
 // -----
 //	Event Listeners
 // -----
@@ -152,19 +163,9 @@ const createPip = (channel) => {
 // runtime onMessage()
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
 	if ( request.message === 'open-pip' ) {
-		if ( $pip == null ) {
-			createPip(request.detail.channel, request.detail.bigger);
-		}
-		else {
-			$iFrame.attr('src', `https://player.twitch.tv/?channel=${ request.detail.channel }`);
-		}
-
-		if ( request.detail.bigger === true ) {
-			$pip.addClass('bigger');
-		}
-		else {
-			$pip.removeClass('bigger');
-		}
-		chrome.storage.sync.set({ bigger: request.detail.bigger });
+		chrome.storage.sync.set({ bigger: request.detail.bigger }, () => {
+			console.log('hi');
+			openPip(request.detail.channel);
+		});
 	}
 }); //- runtime onMessage()

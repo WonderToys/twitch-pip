@@ -27,8 +27,8 @@ const setPopup = (tab) => {
 
 chrome.runtime.onStartup.addListener(() => setPopup(chrome.activeTab));
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-	if ( changeInfo.status === 'complete' && DO_SWAP != null ) {
-		if ( tab.id === DO_SWAP.tab ) {
+	if ( changeInfo.status === 'complete' ) {
+		if ( DO_SWAP != null && tab.id === DO_SWAP.tab ) {
 			chrome.tabs.sendMessage(DO_SWAP.tab, { 
 				message: 'open-pip',
 				detail: {
@@ -37,6 +37,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 			});  
 			DO_SWAP = null;
 		}
+
+		chrome.tabs.sendMessage(tabId, { message: 'tab-loaded' }); 
 	}
 
 	setPopup(tab)
