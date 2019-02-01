@@ -1,6 +1,6 @@
  {
     "name": "Twitch PiP",
-    "version": "0.1",
+    "version": "0.2.0",
     "description": "A picture-in-picture extension for Twitch.",
     "manifest_version": 2,
     "offline_enabled": false,

@@ -30,9 +30,31 @@ let isMoving = false;
 let $pip = null;
 let $iFrame = null;
 
+let $closeButton = null;
+let $swapButton = null;
+let $openButton = null;
+
 // -----
 //	Helpers
 // -----
+
+const destroyPip = () => {
+	// Remove event handlers
+	$closeButton.off('click');
+	$swapButton.off('click');
+	$openButton.off('click');
+
+	$iFrame.off('load');
+	$pip.off('mouseenter');
+
+	$pip.remove();
+
+	$pip = null;
+	$iFrame = null;
+	$closeButton = null;
+	$swapButton = null;
+	$openButton = null;
+};
 
 // createPip()
 const createPip = (channel) => {
@@ -58,7 +80,7 @@ const createPip = (channel) => {
 		$iFrame.contents().find('head').append(css);
 	});
 
-	$pip.on('mouseover', () => {
+	$pip.on('mouseenter', () => {
 		const playerText = $iFrame.contents().find('a.qa-display-name');
 		const viewers = $iFrame.contents().find('.player-streaminfo__viewers > span > span');
 
@@ -66,33 +88,35 @@ const createPip = (channel) => {
 		$pip.find('.twitch-pip-open').attr('href', `https://www.twitch.tv/${ playerText.text() }`);
 	});
 
-	const closeButton = $pip.find('.twitch-pip-close');
-	closeButton.on('click', () => {
-		$pip.remove();
-
-		$pip = null;
-		$iFrame = null;
+	$closeButton = $pip.find('.twitch-pip-close');
+	$closeButton.on('click', () => {
+		destroyPip();
 	});
 
-	const swapButton = $pip.find('.twitch-pip-swap');
-	swapButton.on('click', () => {
-		chrome.runtime.sendMessage({ 
-			message: 'swap', 
-			detail: { 
-				large: channel,
-				pip: $('.channel-header .channel-header__user--selected h5').text() 
-			}
-		});
+	$swapButton = $pip.find('.twitch-pip-swap');
+	$swapButton.on('click', () => {
+		const swapTo = $('.channel-header .channel-header__user--selected h5').text();
+		const viewerCount = $('[data-a-target="channel-viewers-count"] > .tw-stat__value').text();
+		const state = { key: (new Date()).getTime(), state: {} };
+
+		destroyPip();
+
+		history.pushState(state, null, channel);
+		const popStateEvent = new PopStateEvent('popstate', { state: state });
+		window.dispatchEvent(popStateEvent);
+
+		// Wait a second before creating the pip again. 
+		// The only reason for this is so the flashing of destroying and recreating isn't so jarring
+		setTimeout(() => {
+			createPip(swapTo);
+		}, 1000);
 	});
 
-	const openButton = $pip.find('.twitch-pip-open');
-	openButton.attr('href', `https://www.twitch.tv/${ channel }`);
-	openButton.attr('target', '_blank');
-	openButton.on('click', () => {
-		$pip.remove();
-
-		$pip = null;
-		$iFrame = null;
+	$openButton = $pip.find('.twitch-pip-open');
+	$openButton.attr('href', `https://www.twitch.tv/${ channel }`);
+	$openButton.attr('target', '_blank');
+	$openButton.on('click', () => {
+		destroyPip();
 	});
 
 	// Handle drag and drop. Should move later
@@ -164,7 +188,6 @@ const openPip = (channel) => {
 chrome.runtime.onMessage.addListener((request, sender, callback) => {
 	if ( request.message === 'open-pip' ) {
 		chrome.storage.sync.set({ bigger: request.detail.bigger }, () => {
-			console.log('hi');
 			openPip(request.detail.channel);
 		});
 	}
