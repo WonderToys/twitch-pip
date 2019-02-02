@@ -25,6 +25,18 @@ const PIP_HTML = `
 	</div>
 `;
 
+const IFRAME_CSS = `
+	<style type="text/css">
+		.player-streaminfo { display: none !important; }
+		.player-button.player-button--twitch { display: none !important; }
+		.player-button.qa-fullscreen-button { display: none !important; }
+		.player-button.player-button--settings { display: none !important; }
+		.extension-taskbar { display: none !important; }
+		.extension-container { display: none !important; }
+		.qa-settings-banner-span { display: none !important; }
+	</style>
+`;
+
 let isMoving = false;
 
 let $pip = null;
@@ -40,6 +52,27 @@ let _currentChannel = null;
 //	Helpers
 // -----
 
+const setupSideNavListeners = () => {
+	$('body').on('click', '.side-nav-card', function(event) {
+		const $this = $(this);
+		const isOffline = $this.find('.side-nav-card__avatar--offline').length > 0;
+		const isWatching = $('.channel-header .channel-header__user--selected h5').length > 0;
+
+		if ( isOffline !== true && isWatching === true ) {
+			if ( event.shiftKey === true ) {
+				const name = $this.find('.tw-avatar__img').attr('alt');
+				if ( name != null && name.trim().length > 0 ) {
+					openPip(name);
+
+					event.preventDefault();
+					event.stopImmediatePropagation();
+				}
+			}
+		}
+	});
+};
+
+// destroyPip()
 const destroyPip = () => {
 	// Remove event handlers
 	$closeButton.off('click');
@@ -56,7 +89,7 @@ const destroyPip = () => {
 	$closeButton = null;
 	$swapButton = null;
 	$openButton = null;
-};
+}; //- destroyPip()
 
 // createPip()
 const createPip = (channel) => {
@@ -69,19 +102,7 @@ const createPip = (channel) => {
 	$iFrame.attr('src', `https://player.twitch.tv/?channel=${ channel }`);
 
 	$iFrame.on('load', () => {
-		const css = `
-			<style type="text/css">
-				.player-streaminfo { display: none !important; }
-				.player-button.player-button--twitch { display: none !important; }
-				.player-button.qa-fullscreen-button { display: none !important; }
-				.player-button.player-button--settings { display: none !important; }
-				.extension-taskbar { display: none !important; }
-				.extension-container { display: none !important; }
-				.qa-settings-banner-span { display: none !important; }
-			</style>
-		`;
-
-		$iFrame.contents().find('head').append(css);
+		$iFrame.contents().find('head').append(IFRAME_CSS);
 	});
 
 	$pip.on('mouseenter', () => {
@@ -109,11 +130,11 @@ const createPip = (channel) => {
 		const popStateEvent = new PopStateEvent('popstate', { state: state });
 		window.dispatchEvent(popStateEvent);
 
-		// Wait a second before creating the pip again. 
+		// Wait a bit before creating the pip again. 
 		// The only reason for this is so the flashing of destroying and recreating isn't so jarring
 		setTimeout(() => {
 			createPip(swapTo);
-		}, 1000);
+		}, 1500);
 	});
 
 	$openButton = $pip.find('.twitch-pip-open');
@@ -199,22 +220,6 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 		});
 	}
 	else if ( request.message === 'tab-loaded' ) {
-		$('.side-nav-card').on('click', function(event) {
-			const $this = $(this);
-			const isOffline = $this.find('.side-nav-card__avatar--offline').length > 0;
-			const isWatching = $('.channel-header .channel-header__user--selected h5').length > 0;
-
-			if ( isOffline !== true && isWatching === true ) {
-				if ( event.shiftKey === true ) {
-					const name = $this.find('.tw-avatar__img').attr('alt');
-					if ( name != null && name.trim().length > 0 ) {
-						openPip(name);
-
-						event.preventDefault();
-						event.stopImmediatePropagation();
-					}
-				}
-			}
-		})
+		setupSideNavListeners();
 	}
 }); //- runtime onMessage()
