@@ -34,6 +34,8 @@ let $closeButton = null;
 let $swapButton = null;
 let $openButton = null;
 
+let _currentChannel = null;
+
 // -----
 //	Helpers
 // -----
@@ -58,6 +60,8 @@ const destroyPip = () => {
 
 // createPip()
 const createPip = (channel) => {
+	_currentChannel = channel;
+
 	$pip = $(PIP_HTML);
 	$iFrame = $pip.find('iframe');
 
@@ -176,7 +180,10 @@ const openPip = (channel) => {
 		createPip(channel);
 	}
 	else {
-		$iFrame.attr('src', `https://player.twitch.tv/?channel=${ channel }`);
+		if ( (_currentChannel == null) || channel.toLowerCase() !== _currentChannel.toLowerCase ) {
+			_currentChannel = channel;
+			$iFrame.attr('src', `https://player.twitch.tv/?channel=${ channel }`);
+		}
 	}
 };
 
@@ -190,5 +197,24 @@ chrome.runtime.onMessage.addListener((request, sender, callback) => {
 		chrome.storage.sync.set({ bigger: request.detail.bigger }, () => {
 			openPip(request.detail.channel);
 		});
+	}
+	else if ( request.message === 'tab-loaded' ) {
+		$('.side-nav-card').on('click', function(event) {
+			const $this = $(this);
+			const isOffline = $this.find('.side-nav-card__avatar--offline').length > 0;
+			const isWatching = $('.channel-header .channel-header__user--selected h5').length > 0;
+
+			if ( isOffline !== true && isWatching === true ) {
+				if ( event.shiftKey === true ) {
+					const name = $this.find('.tw-avatar__img').attr('alt');
+					if ( name != null && name.trim().length > 0 ) {
+						openPip(name);
+
+						event.preventDefault();
+						event.stopImmediatePropagation();
+					}
+				}
+			}
+		})
 	}
 }); //- runtime onMessage()
